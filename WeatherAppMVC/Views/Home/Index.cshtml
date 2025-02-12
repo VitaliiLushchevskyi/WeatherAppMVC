@@ -1,4 +1,4 @@
-﻿@using WeatherAppMVC.Models.Weather;
+﻿@using WeatherAppMVC.Models.Weather
 @model WeatherModel
 @{
     ViewData["Title"] = "Weather App";
@@ -6,20 +6,20 @@
 
 <h2>Weather Forecast</h2>
 
-<form method="post" asp-action="GetWeather">
-    <label>Enter city:</label>
-    <input type="text" name="cityName" value="@ViewBag.LastCity" required />
-    <button type="submit">Get Weather</button>
+<form method="post" asp-action="GetWeather" class="weather-form">
+    <label for="cityName">Enter city:</label>
+    <input type="text" id="cityName" name="cityName" value="@ViewBag.LastCity" required />
+    <button type="submit" class="submit-button">Get Weather</button>
 </form>
 
 @if (ViewBag.Error != null)
 {
-    <p style="color:red">@ViewBag.Error</p>
+    <div class="alert alert-error">@ViewBag.Error</div>
 }
 
 @if (ViewBag.RainWarning != null)
 {
-    <p style="color: red; font-weight: bold;">@ViewBag.RainWarning</p>
+    <div class="alert alert-warning">@ViewBag.RainWarning</div>
 }
 
 @if (Model != null)
@@ -27,8 +27,8 @@
     <h3>Weather in @Model.CityName</h3>
     <p>Max Temperature: @Model.Temperature.MaxTemperature °C</p>
     <p>Min Temperature: @Model.Temperature.MinTemperature °C</p>
-    
-    <ul>
+
+    <ul class="weather-conditions">
         @foreach (var condition in Model.Conditions)
         {
             <li>Condition: @condition.Condition</li>

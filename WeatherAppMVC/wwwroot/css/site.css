@@ -20,3 +20,51 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.weather-form {
+  margin-bottom: 20px;
+}
+
+.weather-form label {
+   font-size: 1.1em;
+   margin-right: 10px;
+}
+
+.weather-form input {
+   padding: 5px;
+   font-size: 1em;
+   margin-right: 10px;
+}
+
+.weather-form button {
+   padding: 5px 10px;
+   font-size: 1em;
+   cursor: pointer;
+}
+
+.alert {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.weather-conditions {
+    list-style-type: none;
+    padding: 0;
+}
+
+.weather-conditions li {
+   margin-bottom: 5px;
+}
