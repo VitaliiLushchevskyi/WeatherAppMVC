@@ -1,37 +1,32 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
 using WeatherAppMVC.Models.Weather;
 using WeatherAppMVC.Services.Interfaces;
 
 namespace WeatherAppMVC.Services.Implementations;
 
-public class WeatherService : IWeatherService
+public class WeatherService(HttpClient _httpClient, IConfiguration _configuration) : IWeatherService
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _apiKey;
-    private readonly string _baseUrl;
+    private readonly string _apiKey = _configuration["WeatherApi:ApiKey"] ?? throw new ArgumentNullException(nameof(_apiKey));
+    private readonly string _baseUrl = _configuration["WeatherApi:BaseUrl"] ?? throw new ArgumentNullException(nameof(_baseUrl));
 
-    public WeatherService(HttpClient httpClient, IConfiguration configuration)
+    public async Task<WeatherModel> GetWeatherAsync(string cityName)
     {
-        _httpClient = httpClient;
-        _apiKey = configuration["WeatherApi:ApiKey"] ?? throw new ArgumentNullException(nameof(_apiKey));
-        _baseUrl = configuration["WeatherApi:BaseUrl"] ?? throw new ArgumentNullException(nameof(_baseUrl));
+        var url = BuildWeatherApiUrl(cityName);
+        var response = await _httpClient.GetAsync(url);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            throw new ArgumentException($"City '{cityName}' not found.");
+        }
+        else if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Failed to retrieve weather data. Status Code: {response.StatusCode}");
+        }
+
+        var json = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<WeatherModel>(json) ?? throw new JsonException("Failed to deserialize weather data.");
     }
 
-    public async Task<WeatherModel?> GetWeatherAsync(string cityName)
-    {
-        var url = $"{_baseUrl}?q={cityName}&appid={_apiKey}&units=metric";
-
-        try
-        {
-            var response = await _httpClient.GetAsync(url);
-            if (!response.IsSuccessStatusCode) return null;
-
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<WeatherModel>(json);
-        }
-        catch
-        {
-            return null;
-        }
-    }
+    private string BuildWeatherApiUrl(string cityName) => $"{_baseUrl}?q={cityName}&appid={_apiKey}&units=metric";
 }
