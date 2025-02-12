@@ -23,25 +23,28 @@ public class HomeController(IWeatherService weatherService, IStorageService stor
             return View("Index");
         }
 
-        var weatherInfo = await weatherService.GetWeatherAsync(cityName);
-        if (weatherInfo == null)
+        try
         {
-           ViewBag.Error = "Could not retrieve weather data. Please check the city name.";
-           return View("Index");
+            var weatherInfo = await weatherService.GetWeatherAsync(cityName);
+            storageService.SaveLastCity(cityName);
+
+            bool isRaining = weatherInfo.Conditions.Exists(w => w.Condition.Contains("rain", StringComparison.CurrentCultureIgnoreCase));
+            bool alreadyWarned = storageService.HasWarned(cityName);
+
+            if (isRaining && !alreadyWarned)
+            {
+                ViewBag.RainWarning = "Warning: It’s going to rain today!";
+                storageService.MarkAsWarned(cityName);
+            }
+
+            return View("Index", weatherInfo);
+        }
+        catch (Exception ex) 
+        {
+            ViewBag.Error = ex.Message;
         }
 
-        storageService.SaveLastCity(cityName);
-
-        bool isRaining = weatherInfo.Conditions.Exists(w => w.Condition.Contains("rain", StringComparison.CurrentCultureIgnoreCase));
-        bool alreadyWarned = storageService.HasWarned(cityName); 
-
-        if (isRaining && !alreadyWarned)
-        {
-            ViewBag.RainWarning = "Warning: It’s going to rain today!";
-            storageService.MarkAsWarned(cityName); 
-        }
-
-        return View("Index", weatherInfo);
+        return View("Index");
     }
 
     public IActionResult Privacy()
